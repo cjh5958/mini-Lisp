@@ -1,0 +1,54 @@
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+.env/
+
+# IDE and editor configuration files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+*.bak
+*~
+*.log
+*.tmp
+*.orig
+*.sublime-workspace
+*.sublime-project
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Dependency files
+*.egg-info/
+pip-wheel-metadata/
+build/
+dist/
+
+# Generated documentation
+docs/_build/
+*.rst~
+
+# Temporary files
+/sample.py
