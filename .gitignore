@@ -3,32 +3,22 @@ __pycache__/
 *.py[cod]
 
 # Virtual environment
-venv/
 .env/
 
 # IDE and editor configuration files
 .vscode/
-.idea/
-*.swp
-*.swo
-*.swn
-*.bak
-*~
-*.log
-*.tmp
-*.orig
-*.sublime-workspace
-*.sublime-project
 
 # OS-specific files
 .DS_Store
-Thumbs.db
 
 # Logs and temporary files
 *.log
 *.tmp
 *.swp
 *.bak
+/sample.py
+/output
+/tests
 
 # Unit test / coverage reports
 htmlcov/
@@ -49,6 +39,3 @@ dist/
 # Generated documentation
 docs/_build/
 *.rst~
-
-# Temporary files
-/sample.py

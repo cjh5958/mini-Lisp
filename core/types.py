@@ -1,0 +1,117 @@
+"""
+types.py: Defines all basic type of tokens and exceptions.
+"""
+from typing import Optional, Self, TypeAlias, Union
+
+############ Token type definitions ############
+Symbol: TypeAlias = str
+Number: TypeAlias = int
+
+class Token:
+    """
+    Token class: Generic token type definition.
+
+    :param token: Single token to become a valid type
+    :type token: :obj: 'str'
+
+    :return: Instance of Number or Symbol
+    :rtype: :class: 'core.types.Number' or :class: 'core.types.Symbol'
+
+    :raise TypeError: Raise a TypeError if it's a token with an invalid format
+
+    Examples:
+
+    1.
+        token = '123'
+        try:
+            return Token(token)
+        except TypeError as e:
+            print(e)
+            return None
+        
+        >> get 123
+
+    2.
+        token = 'abc'
+        try:
+            return Token(token)
+        except TypeError as e:
+            print(e)
+            return None
+        
+        >> get "abc"
+
+    3.
+        token = '12a'
+        try:
+            return Token(token)
+        except TypeError as e:
+            print(e)
+            return None
+        
+        >> get TypeError("Invalid token: 12a")
+        
+    """
+    def __new__(cls: type[Self], token: str) -> Number | Symbol:
+        try:
+            return Number(token)
+        except ValueError:
+            pass
+
+        reserved_words = cls.reserved_words()
+        if cls._is_valid_symbol(token, reserved_words):
+            return Symbol(token)
+
+        raise TypeError(f"Invalid token: {token}")
+
+    @staticmethod
+    def reserved_words() -> dict:
+        """ Generate a map of all reserved words with corresponding lambda function. """
+        return {
+            "+":            lambda x, y: x + y,
+            "-":            lambda x, y: x - y,
+            "*":            lambda x, y: x * y,
+            "/":            lambda x, y: int(x / y) if y != 0 else float("inf"),  # divided by zero error
+            "mod":          lambda x, y: x % y,
+            ">":            lambda x, y: x > y,
+            "<":            lambda x, y: x < y,
+            "=":            lambda x, y: x == y,
+            "if":           lambda condition, then_expr, else_expr: then_expr if condition else else_expr,
+            "define":       lambda name, value: f"Define {name} as {value}",    # unused
+            "#t":           lambda: True,
+            "#f":           lambda: False,
+            "and":          lambda x, y: x and y,
+            "or":           lambda x, y: x or y,
+            "not":          lambda x: not x,
+            "print-num":    lambda x: print(x),
+            "print-bool":   lambda x: print("#t") if x else print("#f")
+        }
+
+    @staticmethod
+    def _is_valid_symbol(token: str, reserved_words: Optional[dict] = {}) -> bool:
+        """ Check if a token is a valid symbol. """
+        import re
+
+        if token in reserved_words:
+            return True
+
+        symbol_pattern = r'^[a-zA-Z][a-zA-Z0-9\-]*$'
+        return re.match(symbol_pattern, token) is not None
+
+############ Exception type definitions ############
+class InterpreterException(Exception):
+    """ Generic interpreter exception. """
+
+    def __init__(self, value: str = ''):
+        self.value = value
+
+    def __str__(self) -> str:
+        msg = self.__class__.__doc__ or ''
+        if self.value:
+            msg = msg.rstrip('.')
+            if "'" in self.value:
+                value = self.value
+            else:
+                value = repr(self.value)
+            msg += f': {value}'
+        return msg
