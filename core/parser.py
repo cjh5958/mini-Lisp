@@ -2,15 +2,14 @@
 parser.py: 
 """
 from core.config import DEBUG_MODE
-from core.types import Number, Symbol, Token
+from core.types import Token
 
 def parse(program: str):
     tokens = tokenize(program)
     
     if DEBUG_MODE:
-        print()
-        print("\nList of all tokens:", tokens)
-        print()
+        print("="*15 + " Start Parse Process " + "="*15)
+        print("List of all tokens:", tokens)
 
     rtn = []
     while not len(tokens) == 0:

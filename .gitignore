@@ -18,6 +18,7 @@ __pycache__/
 *.bak
 /sample.py
 /output
+/testcases/answers
 /tests
 
 # Unit test / coverage reports

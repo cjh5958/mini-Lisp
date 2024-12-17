@@ -1,6 +1,7 @@
 from typing import Optional, Self
 
 from core.types import Token
+from core.types import UndefinedSymbol
 
 class Env(dict):
     """
@@ -41,7 +42,7 @@ class Env(dict):
         if var in self: return self
         if self.outer is not None:
             return self.outer.find(var)
-        return None
+        raise UndefinedSymbol("Undefined symbol")
 
 def standard_env() -> Env:
     """ The way to get a basic environment with some Scheme standard procedures. """

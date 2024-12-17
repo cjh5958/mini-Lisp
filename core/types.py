@@ -1,7 +1,7 @@
 """
-types.py: Defines all basic type of tokens and exceptions.
+types.py: Defines basic type of tokens and exceptions.
 """
-from typing import Optional, Self, TypeAlias, Union
+from typing import Optional, Self, TypeAlias
 
 ############ Token type definitions ############
 Symbol: TypeAlias = str
@@ -52,6 +52,10 @@ class Token:
         >> get TypeError("Invalid token: 12a")
         
     """
+    Number = Number
+    Symbol = Symbol
+    Subtree: TypeAlias = list
+
     def __new__(cls: type[Self], token: str) -> Number | Symbol:
         try:
             return Number(token)
@@ -68,23 +72,23 @@ class Token:
     def reserved_words() -> dict:
         """ Generate a map of all reserved words with corresponding lambda function. """
         return {
-            "+":            lambda x, y: x + y,
+            "if":           lambda condition, then_expr, else_expr: then_expr if condition else else_expr,
+            "define":       lambda name, value: f"Define {name} as {value}",    # unused
+            "+":            lambda *x: eval('+'.join(map(str, x))),
+            "*":            lambda *x: eval('*'.join(map(str, x))),
+            "=":            lambda *x: eval('=='.join(map(str, x))),
+            "and":          lambda *x: all(x),
+            "or":           lambda *x: any(x),
             "-":            lambda x, y: x - y,
-            "*":            lambda x, y: x * y,
             "/":            lambda x, y: int(x / y) if y != 0 else float("inf"),  # divided by zero error
             "mod":          lambda x, y: x % y,
             ">":            lambda x, y: x > y,
             "<":            lambda x, y: x < y,
-            "=":            lambda x, y: x == y,
-            "if":           lambda condition, then_expr, else_expr: then_expr if condition else else_expr,
-            "define":       lambda name, value: f"Define {name} as {value}",    # unused
-            "#t":           lambda: True,
-            "#f":           lambda: False,
-            "and":          lambda x, y: x and y,
-            "or":           lambda x, y: x or y,
             "not":          lambda x: not x,
             "print-num":    lambda x: print(x),
-            "print-bool":   lambda x: print("#t") if x else print("#f")
+            "print-bool":   lambda x: print("#t") if x else print("#f"),
+            "#t":           True,
+            "#f":           False
         }
 
     @staticmethod
@@ -97,6 +101,9 @@ class Token:
 
         symbol_pattern = r'^[a-zA-Z][a-zA-Z0-9\-]*$'
         return re.match(symbol_pattern, token) is not None
+    
+
+class Procedure: ...
 
 ############ Exception type definitions ############
 class InterpreterException(Exception):
@@ -115,3 +122,15 @@ class InterpreterException(Exception):
                 value = repr(self.value)
             msg += f': {value}'
         return msg
+    
+class ParserException(InterpreterException):
+    """ Generic exception while parsing. """
+
+class EvaluatorException(InterpreterException):
+    """ Exception while evaluating. """
+
+class InvalidSyntax(EvaluatorException):
+    """ Invalid syntax. """
+
+class UndefinedSymbol(EvaluatorException):
+    """ Undefined symbol. """
