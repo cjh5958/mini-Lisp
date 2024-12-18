@@ -38,6 +38,8 @@ class Env(dict):
         :rtype: :dict: 'core.environment.Env'
         :rtype: None
 
+        :raise Exception: :core.types.UndefinedSymbol:  Symbol name not defined in neither local nor global scope
+
         """
         if var in self: return self
         if self.outer is not None:
