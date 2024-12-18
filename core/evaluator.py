@@ -5,6 +5,35 @@ from core.config import DEBUG_MODE
 from core.environment import Env
 from core.types import Token
 
+class Procedure:
+    """ 
+    class Procedure: User defined callable sub-procedure object .
+
+    :param params: 
+    :type params: 'list[core.types.Token]'
+
+    :param body:
+    :type body: 'list[core.types.Token]'
+
+    :param env:
+    :type env: 'core.environment.Env'
+
+    """
+    def __init__(
+        self,
+        params: list[Token],
+        body: list[Token],
+        env: Env
+    ): self.params, self.body, self.env = params, body, Env(outer=env)
+
+    def __call__(
+        self,
+        args: list
+    ):
+        self.env.update(zip(self.params, args))
+        return eval(self.body, self.env)
+
+
 def eval(exp, env: Env):
     if DEBUG_MODE:
         print('-'*50)
@@ -13,24 +42,27 @@ def eval(exp, env: Env):
     # Number
     if isinstance(exp, Token.Number):
         if DEBUG_MODE:
-            print("Number type: Nothing to do.")
+            print("Type: Number -> Nothing to do.")
         return exp
 
     # Symbol
     elif isinstance(exp, Token.Symbol):
         value = env.find(exp)[exp]
         if DEBUG_MODE:
-            print("Symbol type: Value is", value)
+            print("Type: Symbol -> Value is", value)
         return value
 
-    # Else
+    # Subtree(Actually processing a list)
     op = exp[0]
     rwords = Token.reserved_words()
-
     if DEBUG_MODE:
-        print("First operation:", op)
+        print("Type: Subtree -> First operation is", op)
 
-    if not rwords.get(op, None) == None:    # reserved words
+    if isinstance(op, Token.Subtree):               # ((fun (params...) body) args...)
+        (_, *args) = exp
+        return eval(op, env)(args)
+
+    elif not rwords.get(op, None) == None:    # reserved words
 
         # Special cases
         if op == "if":                              # (if cond then_exp else_exp)
@@ -40,6 +72,11 @@ def eval(exp, env: Env):
         elif op == "define":                        # (define var exp)
             (_, var_name, var_value) = exp
             env[var_name] = eval(var_value, env)
+
+        elif op == "fun":                           # (fun (params...) body)
+            (_, *params) = exp
+            (params, body) = params
+            return Procedure(params, body, env)
 
         # 1 param cases
         elif op == "not":

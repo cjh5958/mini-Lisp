@@ -70,23 +70,29 @@ class Token:
 
     @staticmethod
     def reserved_words() -> dict:
-        """ Generate a map of all reserved words with corresponding lambda function. """
+        """ Generate a map of all reserved words paired with corresponding lambda functions. """
         return {
+            # Special form
+            "fun":          lambda params, body: ...,
             "if":           lambda condition, then_expr, else_expr: then_expr if condition else else_expr,
-            "define":       lambda name, value: f"Define {name} as {value}",    # unused
+            "define":       lambda name, value: ...,    # unused
+            # Multiple params form
             "+":            lambda *x: eval('+'.join(map(str, x))),
             "*":            lambda *x: eval('*'.join(map(str, x))),
             "=":            lambda *x: eval('=='.join(map(str, x))),
             "and":          lambda *x: all(x),
             "or":           lambda *x: any(x),
+            # Two params form
             "-":            lambda x, y: x - y,
             "/":            lambda x, y: int(x / y) if y != 0 else float("inf"),  # divided by zero error
             "mod":          lambda x, y: x % y,
             ">":            lambda x, y: x > y,
             "<":            lambda x, y: x < y,
+            # Single param form
             "not":          lambda x: not x,
             "print-num":    lambda x: print(x),
             "print-bool":   lambda x: print("#t") if x else print("#f"),
+            # Constants
             "#t":           True,
             "#f":           False
         }
