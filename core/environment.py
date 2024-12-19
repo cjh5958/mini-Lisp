@@ -1,4 +1,5 @@
-from typing import Optional, Self
+import json
+from typing import Any, Callable, Optional, Self
 
 from core.types import Token
 from core.types import UndefinedSymbol
@@ -26,6 +27,19 @@ class Env(dict):
         ):
         self.update(zip(params, args))
         self.outer = outer
+    
+    def to_dict(self) -> dict[str, Any]:
+        r = {}
+        for key, val in self.items():
+            r[key] = "Procedure" if isinstance(val, Callable) else val
+        if self.outer:
+            r["outer"] = self.outer.to_dict()
+        return r
+
+    def __str__(self):
+        """ Visualize Env structure for debugging. """
+        formatted_dict = self.to_dict()
+        return json.dumps(formatted_dict, indent=2, skipkeys=True)
 
     def find(self, var) -> Self | None:
         """

@@ -3,6 +3,19 @@ import pytest
 from core.environment import Env, standard_env
 
 class TestEnv:
+
+    def test_str(self, capsys):
+        e = standard_env()
+        print(e)
+        e = Env(
+            ('a', 'b', 'c', 'd'),
+            (1, 2, 3, 4),
+            e
+        )
+        print(e)
+        cap = capsys.readouterr()
+        print(cap.out)
+
     def test_basic(self):
         env = Env()
         assert env == {}
