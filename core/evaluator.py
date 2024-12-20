@@ -35,8 +35,8 @@ class Procedure:
             print('-'*10 + " Procedure called " + '-'*10)
             print("Current environment:")
             print(env)
-        return eval(self.body, env)
-
+        result = eval_all(self.body, env)
+        return result[len(result)-1]
 
 def eval(exp, env: Env):
     """ Evaluating function to evaluate each expressions in recursive way. """
@@ -84,7 +84,7 @@ def eval(exp, env: Env):
 
             elif op == "fun":                           # (fun (params...) body)
                 (_, *params) = exp
-                (params, body) = params
+                (params, *body) = params
                 return Procedure(params, body, env)
 
             # 1 param cases
