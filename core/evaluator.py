@@ -3,6 +3,7 @@ evaluator.py: Core part of the interpreter
 """
 from core.config import DEBUG_MODE
 from core.environment import Env
+from core.handler import InterpreterException
 from core.types import Token
 
 class Procedure:
@@ -52,11 +53,15 @@ def eval(exp, env: Env):
 
     # Symbol
     elif isinstance(exp, Token.Symbol):
-        value = env.find(exp)[exp]
-        if DEBUG_MODE:
-            print("Type: Symbol -> Value is", value)
-        return value
-
+        try:
+            value = env.find(exp)[exp]
+            if DEBUG_MODE:
+                print("Type: Symbol -> Value is", value)
+            return value
+        except InterpreterException as e:
+            print(e)
+            exit(0)
+        
     # Subtree (Actually processing a list)
     op = exp[0]     # Unpack the expression
     rwords = Token.reserved_words()
@@ -129,6 +134,9 @@ def eval(exp, env: Env):
                 if DEBUG_MODE:
                     print(f"Entrying procedure `{op}`:", proc)
                 return proc(*args)
+            except InterpreterException as e:
+                print(e)
+                exit(0)
             except Exception:
                 if isinstance(op, Token.Number): return op
     

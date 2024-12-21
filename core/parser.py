@@ -3,6 +3,7 @@ parser.py:
 """
 from core.config import DEBUG_MODE
 from core.types import Token
+from core.handler import InterpreterException
 
 def parse(program: str):
     tokens = tokenize(program)
@@ -46,7 +47,6 @@ def atom(token: str) -> Token | None:
     """
     try:
         return Token(token)
-    except TypeError as e:
-        if DEBUG_MODE:
-            print(e)
-        return None
+    except InterpreterException as e:
+        print(e)
+        exit(0)

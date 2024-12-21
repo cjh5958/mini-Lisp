@@ -31,6 +31,7 @@ def repl(prompt: Optional[str] = '') -> NoReturn:
 
     if DEBUG_MODE:
         print("Tokens AST after parsing:", ast)
+        print("="*12 + " Start Evaluating Process " + "="*13)
 
     global_env = standard_env()
 

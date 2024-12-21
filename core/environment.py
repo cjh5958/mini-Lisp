@@ -2,7 +2,7 @@ import json
 from typing import Any, Callable, Optional, Self
 
 from core.types import Token
-from core.types import UndefinedSymbol
+from core.handler import UndefinedSymbol
 
 class Env(dict):
     """
@@ -58,7 +58,7 @@ class Env(dict):
         if var in self: return self
         if self.outer is not None:
             return self.outer.find(var)
-        raise UndefinedSymbol("Undefined symbol")
+        raise UndefinedSymbol(f"Undefined symbol: {var}")
 
 def standard_env() -> Env:
     """ The way to get a basic environment with some Scheme standard procedures. """
