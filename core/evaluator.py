@@ -3,7 +3,7 @@ evaluator.py: Core part of the interpreter
 """
 from core.config import DEBUG_MODE
 from core.environment import Env
-from core.handler import InterpreterException
+from core.handler import InterpreterException, NotExpectedArgument
 from core.types import Token
 
 class Procedure:
@@ -68,12 +68,6 @@ def eval(exp, env: Env):
     if DEBUG_MODE:
         print("Type: Subtree -> First operation is", op)
 
-    if len(exp) == 1:
-        val = eval(op, env)
-        if DEBUG_MODE:
-            print(f"{op}'s value is {val}")
-        return val
-    
     try:
         v = rwords.get(op, None)
         if not v == None:
@@ -120,11 +114,13 @@ def eval(exp, env: Env):
 
             # 2 params cases
             elif op in ["-", "/", "mod", ">", "<"]:     # (op exp exp)     
-                (_, exp1, exp2) = exp
+                (_, *exps) = exp
                 if DEBUG_MODE:
-                    print("2 params need to be processed first:", [exp1, exp2])
-                args = eval_all([exp1, exp2], env)
+                    print("2 params need to be processed first:", exps)
                 try:
+                    if not len(exps) == 2:
+                        raise NotExpectedArgument(f"Need 2 arguments, but got {len(exps)}.")
+                    args = eval_all(exps, env)
                     return env.find(op)[op](*args)
                 except InterpreterException as e:
                     print(e)
@@ -135,8 +131,10 @@ def eval(exp, env: Env):
                 (_, *exps) = exp
                 if DEBUG_MODE:
                     print(f"{len(exps)} params need to be processed first:", exps)
-                exps = eval_all(exps, env)
                 try:
+                    if len(exps) < 2:
+                        raise NotExpectedArgument(f"Need at least 2 arguments, but got {len(exps)}.")
+                    exps = eval_all(exps, env)
                     return env.find(op)[op](*exps)
                 except InterpreterException as e:
                     print(e)
@@ -161,11 +159,16 @@ def eval(exp, env: Env):
                 print(e)
                 exit(-1)
                 
-    
-    except TypeError:                                   # ((lambda) args...)
-        (_, *args) = exp
-        args = eval_all(args, env)
-        return eval(op, env)(*args)
+    except TypeError:                                   # ((lambda) args...) or exp[0] is a list like [['>', 'x', 'y']]
+        if len(exp)==1:
+            val = eval(op, env)
+            if DEBUG_MODE:
+                print(f"{op}'s value is {val}")
+            return val
+        else:
+            (_, *args) = exp
+            args = eval_all(args, env)
+            return eval(op, env)(*args)
         
 def eval_all(exps: list, env: Env) -> list:
     r = []

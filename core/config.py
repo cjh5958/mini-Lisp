@@ -1,2 +1,2 @@
 DEBUG_MODE = False
-PROMPT = '>> '
+PROMPT = ''

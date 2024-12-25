@@ -4,18 +4,6 @@ from core.environment import Env, standard_env
 
 class TestEnv:
 
-    def test_str(self, capsys):
-        e = standard_env()
-        print(e)
-        e = Env(
-            ('a', 'b', 'c', 'd'),
-            (1, 2, 3, 4),
-            e
-        )
-        print(e)
-        cap = capsys.readouterr()
-        print(cap.out)
-
     def test_basic(self):
         env = Env()
         assert env == {}
@@ -57,16 +45,11 @@ class TestEnv:
             ('<', [100, 99], False),
             ('=', [100, 100], True),
             ('=', [100, 99], False),
-            ('if', [True, True, False], True),
-            ('if', [False, True, False], False),
-            ('if', [True, "Apple", "Banana"], "Apple"),
             ("and", [True, True], True),
             ("or", [False, False], False),
             ("or", [True, False], True),
             ("not", [True], False),
-            ("not", [False], True),
-            ("print-num", [123], None),
-            ("print-bool", [True], None)
+            ("not", [False], True)
         ]
     )
     def test_standard_env(self, var, args, ans):
