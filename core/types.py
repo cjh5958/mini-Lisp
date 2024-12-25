@@ -115,6 +115,6 @@ def TypeChecker(function_name, count, type_name, *args) -> bool:
     for i in range(count):
         if not type(args[i]) == type_name:
             if callable(args[i]):
-                raise NotExpectedArgument(f"Unexpected function called here ---> {args[i].params}.")
+                raise NotExpectedArgument()
             raise TypeError(f"`{function_name}` expected {'some' if count > 2 else count} '{'Number' if type_name is Number else 'Boolean'}' but got other {'types' if count > 1 else 'type'}.")
     return True
