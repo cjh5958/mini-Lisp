@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, Optional, Self
+from typing import Any, Optional, Self
 
 from core.types import Token
 from core.handler import UndefinedSymbol
@@ -31,7 +31,7 @@ class Env(dict):
     def to_dict(self) -> dict[str, Any]:
         r = {}
         for key, val in self.items():
-            r[key] = "Procedure" if isinstance(val, Callable) else val
+            r[key] = "Procedure" if callable(val) else val
         if self.outer:
             r["outer"] = self.outer.to_dict()
         return r

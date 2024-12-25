@@ -6,7 +6,7 @@ class InterpreterException(Exception):
         self.value = value
 
     def __str__(self) -> str:
-        return self.__class__.__doc__.strip() + ": " + self.value
+        return self.__class__.__doc__.strip() + ": " + self.value if self.value else self.__class__.__doc__.strip()
     
 class ParserException(InterpreterException):
     """ Generic exception while parsing """
@@ -20,7 +20,7 @@ class InvalidSymbol(InterpreterException):
 class TypeError(InterpreterException):
     """ Type error """
 
-class SyntaxError(InterpreterException):
+class NotExpectedArgument(InterpreterException):
     """ Syntax error """
 
 class ParameterError(InterpreterException):

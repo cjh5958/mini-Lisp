@@ -3,11 +3,12 @@ types.py: Defines basic type of tokens.
 """
 from typing import Optional, Self, TypeAlias
 
-from core.handler import InvalidSymbol, TypeError, ParameterError
+from core.handler import InvalidSymbol, TypeError, ParameterError, NotExpectedArgument
 
 ############ Token type definitions ############
 Symbol: TypeAlias = str
 Number: TypeAlias = int
+Boolean: TypeAlias = bool
 
 class Token:
     """
@@ -79,21 +80,21 @@ class Token:
             "if":           lambda condition, then_expr, else_expr: ...,
             "define":       lambda name, value: ...,
             # Multiple params form
-            "+":            lambda *x: (_ for _ in ()).throw(TypeError("`+` operator expected some 'Number' but got other.")) if any(type(arg) is not Number for arg in x) else eval('+'.join(map(str, x))),
-            "*":            lambda *x: (_ for _ in ()).throw(TypeError("`*` operator expected some 'Number' but got other.")) if any(type(arg) is not Number for arg in x) else eval('*'.join(map(str, x))),
-            "=":            lambda *x: (_ for _ in ()).throw(TypeError("`=` operator expected some 'Number' but got other.")) if any(type(arg) is not Number for arg in x) else eval('=='.join(map(str, x))),
-            "and":          lambda *x: (_ for _ in ()).throw(TypeError("`and` operator expected some 'Boolean' but got other.")) if any(type(arg) is not bool for arg in x) else all(x),
-            "or":           lambda *x: (_ for _ in ()).throw(TypeError("`or` operator expected some 'Boolean' but got other.")) if any(type(arg) is not bool for arg in x) else any(x),
+            "+":            lambda *x: eval('+'.join(map(str, x))) if TypeChecker('operator +', len(x), Number, *x) else ...,
+            "*":            lambda *x: eval('*'.join(map(str, x))) if TypeChecker('operator *', len(x), Number, *x) else ...,
+            "=":            lambda *x: eval('=='.join(map(str, x))) if TypeChecker('operator =', len(x), Number, *x) else ...,
+            "and":          lambda *x: all(x) if TypeChecker('operator and', len(x), Boolean, *x) else ...,
+            "or":           lambda *x: any(x) if TypeChecker('operator or', len(x), Boolean, *x) else ...,
             # Two params form
-            "-":            lambda x, y: (_ for _ in ()).throw(TypeError("`-` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x - y,
-            "/":            lambda x, y: (_ for _ in ()).throw(TypeError("`/` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else ((_ for _ in ()).throw(ParameterError(f"{x} devided by 0.")) if y==0 else int(x / y)),  # divided by zero error
-            "mod":          lambda x, y: (_ for _ in ()).throw(TypeError("`mod` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x % y,
-            ">":            lambda x, y: (_ for _ in ()).throw(TypeError("`>` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x > y,
-            "<":            lambda x, y: (_ for _ in ()).throw(TypeError("`<` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x < y,
+            "-":            lambda x, y: x - y if TypeChecker('operator -', 2, Number, x, y) else ...,
+            "/":            lambda x, y: ((_ for _ in ()).throw(ParameterError(f"{x} devided by 0.")) if y==0 else int(x / y)) if TypeChecker('operator /', 2, Number, x, y) else ...,  # divided by zero error
+            "mod":          lambda x, y: x % y if TypeChecker('operator mod', 2, Number, x, y) else ...,
+            ">":            lambda x, y: x > y if TypeChecker('operator >', 2, Number, x, y) else ...,
+            "<":            lambda x, y: x < y if TypeChecker('operator <', 2, Number, x, y) else ...,
             # Single param form
-            "not":          lambda x: (_ for _ in ()).throw(TypeError("`not` operator expected a 'Boolean' but got other.")) if not type(x) is bool else not x,
-            "print-num":    lambda x: (_ for _ in ()).throw(TypeError("`print-num` function expected a 'Number' but got other.")) if not type(x) is Number else print(x),
-            "print-bool":   lambda x: (_ for _ in ()).throw(TypeError("`print-bool` function expected a 'Boolean' but got other.")) if not type(x) is bool else print("#t" if x else "#f"),
+            "not":          lambda x: not x if TypeChecker('not', 1, Boolean, x) else ...,
+            "print-num":    lambda x: print(x) if TypeChecker('print-num', 1, Number, x) else ...,
+            "print-bool":   lambda x: print("#t" if x else "#f") if TypeChecker('print-bool', 1, Boolean, x) else ...,
             # Constants
             "#t":           True,
             "#f":           False
@@ -109,3 +110,11 @@ class Token:
 
         symbol_pattern = r'^[a-zA-Z][a-zA-Z0-9\-]*$'
         return re.match(symbol_pattern, token) is not None
+    
+def TypeChecker(function_name, count, type_name, *args) -> bool:
+    for i in range(count):
+        if not type(args[i]) == type_name:
+            if callable(args[i]):
+                raise NotExpectedArgument(f"Unexpected function called here ---> {args[i].params}.")
+            raise TypeError(f"`{function_name}` expected {'some' if count > 2 else count} '{'Number' if type_name is Number else 'Boolean'}' but got other {'types' if count > 1 else 'type'}.")
+    return True
