@@ -60,13 +60,19 @@ def eval(exp, env: Env):
             return value
         except InterpreterException as e:
             print(e)
-            exit(0)
+            exit(-1)
         
     # Subtree (Actually processing a list)
-    op = exp[0]     # Unpack the expression
+    op = exp[0]
     rwords = Token.reserved_words()
     if DEBUG_MODE:
         print("Type: Subtree -> First operation is", op)
+
+    if len(exp) == 1:
+        val = eval(op, env)
+        if DEBUG_MODE:
+            print(f"{op}'s value is {val}")
+        return val
     
     try:
         v = rwords.get(op, None)
@@ -95,14 +101,22 @@ def eval(exp, env: Env):
             # 1 param cases
             elif op == "not":
                 (_, exp1) = exp
-                return env.find(op)[op](eval(exp1, env))
+                try:
+                    return env.find(op)[op](eval(exp1, env))
+                except InterpreterException as e:
+                    print(e)
+                    exit(-1)
             
             elif op in ["print-num", "print-bool"]:
                 (_, exp1) = exp
                 arg = eval(exp1, env)
                 if DEBUG_MODE:
                     print(f"Result of {exp1} is", arg)
-                env.find(op)[op](arg)
+                try:
+                    env.find(op)[op](arg)
+                except InterpreterException as e:
+                    print(e)
+                    exit(-1)
 
             # 2 params cases
             elif op in ["-", "/", "mod", ">", "<"]:     # (op exp exp)     
@@ -110,7 +124,11 @@ def eval(exp, env: Env):
                 if DEBUG_MODE:
                     print("2 params need to be processed first:", [exp1, exp2])
                 args = eval_all([exp1, exp2], env)
-                return env.find(op)[op](*args)
+                try:
+                    return env.find(op)[op](*args)
+                except InterpreterException as e:
+                    print(e)
+                    exit(-1)
             
             # multiple params cases
             elif op in ["+", "*", "=", "and", "or"]:    # (op exp exp...)
@@ -118,7 +136,11 @@ def eval(exp, env: Env):
                 if DEBUG_MODE:
                     print(f"{len(exps)} params need to be processed first:", exps)
                 exps = eval_all(exps, env)
-                return env.find(op)[op](*exps)
+                try:
+                    return env.find(op)[op](*exps)
+                except InterpreterException as e:
+                    print(e)
+                    exit(-1)
             
             # constants
             else:
@@ -135,13 +157,14 @@ def eval(exp, env: Env):
                     print(f"Entrying procedure `{op}`:", proc)
                 return proc(*args)
             except InterpreterException as e:
-                print(e)
-                exit(0)
-            except Exception:
                 if isinstance(op, Token.Number): return op
+                print(e)
+                exit(-1)
+                
     
     except TypeError:                                   # ((lambda) args...)
         (_, *args) = exp
+        args = eval_all(args, env)
         return eval(op, env)(*args)
         
 def eval_all(exps: list, env: Env) -> list:

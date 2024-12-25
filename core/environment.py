@@ -58,7 +58,7 @@ class Env(dict):
         if var in self: return self
         if self.outer is not None:
             return self.outer.find(var)
-        raise UndefinedSymbol(f"Undefined symbol: {var}")
+        raise UndefinedSymbol(f"`{var}` has no definition in this scope.")
 
 def standard_env() -> Env:
     """ The way to get a basic environment with some Scheme standard procedures. """

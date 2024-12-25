@@ -3,7 +3,7 @@ types.py: Defines basic type of tokens.
 """
 from typing import Optional, Self, TypeAlias
 
-from core.handler import InvalidSymbol
+from core.handler import InvalidSymbol, TypeError, ParameterError
 
 ############ Token type definitions ############
 Symbol: TypeAlias = str
@@ -68,7 +68,7 @@ class Token:
         if cls._is_valid_symbol(token, reserved_words):
             return Symbol(token)
 
-        raise InvalidSymbol(f"Invalid token: {token}")
+        raise InvalidSymbol(f"{token} was not a valid symbol.")
 
     @staticmethod
     def reserved_words() -> dict:
@@ -76,24 +76,24 @@ class Token:
         return {
             # Special form
             "fun":          lambda params, body: ...,
-            "if":           lambda condition, then_expr, else_expr: then_expr if condition else else_expr,
-            "define":       lambda name, value: ...,    # unused
+            "if":           lambda condition, then_expr, else_expr: ...,
+            "define":       lambda name, value: ...,
             # Multiple params form
-            "+":            lambda *x: eval('+'.join(map(str, x))),
-            "*":            lambda *x: eval('*'.join(map(str, x))),
-            "=":            lambda *x: eval('=='.join(map(str, x))),
-            "and":          lambda *x: all(x),
-            "or":           lambda *x: any(x),
+            "+":            lambda *x: (_ for _ in ()).throw(TypeError("`+` operator expected some 'Number' but got other.")) if any(type(arg) is not Number for arg in x) else eval('+'.join(map(str, x))),
+            "*":            lambda *x: (_ for _ in ()).throw(TypeError("`*` operator expected some 'Number' but got other.")) if any(type(arg) is not Number for arg in x) else eval('*'.join(map(str, x))),
+            "=":            lambda *x: (_ for _ in ()).throw(TypeError("`=` operator expected some 'Number' but got other.")) if any(type(arg) is not Number for arg in x) else eval('=='.join(map(str, x))),
+            "and":          lambda *x: (_ for _ in ()).throw(TypeError("`and` operator expected some 'Boolean' but got other.")) if any(type(arg) is not bool for arg in x) else all(x),
+            "or":           lambda *x: (_ for _ in ()).throw(TypeError("`or` operator expected some 'Boolean' but got other.")) if any(type(arg) is not bool for arg in x) else any(x),
             # Two params form
-            "-":            lambda x, y: x - y,
-            "/":            lambda x, y: int(x / y) if y != 0 else float("inf"),  # divided by zero error
-            "mod":          lambda x, y: x % y,
-            ">":            lambda x, y: x > y,
-            "<":            lambda x, y: x < y,
+            "-":            lambda x, y: (_ for _ in ()).throw(TypeError("`-` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x - y,
+            "/":            lambda x, y: (_ for _ in ()).throw(TypeError("`/` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else ((_ for _ in ()).throw(ParameterError(f"{x} devided by 0.")) if y==0 else int(x / y)),  # divided by zero error
+            "mod":          lambda x, y: (_ for _ in ()).throw(TypeError("`mod` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x % y,
+            ">":            lambda x, y: (_ for _ in ()).throw(TypeError("`>` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x > y,
+            "<":            lambda x, y: (_ for _ in ()).throw(TypeError("`<` operator expected two 'Number' but got other.")) if not (type(x) is Number and type(y) is Number) else x < y,
             # Single param form
-            "not":          lambda x: not x,
-            "print-num":    lambda x: print(x),
-            "print-bool":   lambda x: print("#t") if x else print("#f"),
+            "not":          lambda x: (_ for _ in ()).throw(TypeError("`not` operator expected a 'Boolean' but got other.")) if not type(x) is bool else not x,
+            "print-num":    lambda x: (_ for _ in ()).throw(TypeError("`print-num` function expected a 'Number' but got other.")) if not type(x) is Number else print(x),
+            "print-bool":   lambda x: (_ for _ in ()).throw(TypeError("`print-bool` function expected a 'Boolean' but got other.")) if not type(x) is bool else print("#t" if x else "#f"),
             # Constants
             "#t":           True,
             "#f":           False

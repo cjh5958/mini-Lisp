@@ -6,19 +6,22 @@ class InterpreterException(Exception):
         self.value = value
 
     def __str__(self) -> str:
-        return self.value
+        return self.__class__.__doc__.strip() + ": " + self.value
     
 class ParserException(InterpreterException):
-    """ Generic exception while parsing. """
+    """ Generic exception while parsing """
 
 class UndefinedSymbol(InterpreterException):
-    """ Undefined symbol. """
+    """ Undefined symbol """
 
 class InvalidSymbol(InterpreterException):
-    """ Invalid symbol. """
+    """ Invalid symbol """
 
 class TypeError(InterpreterException):
-    """ Type error. """
+    """ Type error """
 
 class SyntaxError(InterpreterException):
-    """ Syntax error. """
+    """ Syntax error """
+
+class ParameterError(InterpreterException):
+    """ Parameter error """
