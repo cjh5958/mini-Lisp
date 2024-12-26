@@ -1,4 +1,4 @@
-PROGRAM_NAME="lis.py"    # TODO: 請修改成你的執行檔名稱
+PROGRAM_NAME="lis.py"
 PASSED=0
 FAILED=0
 TEST_DIR="./testcases"
@@ -18,7 +18,12 @@ for test_file in $TEST_DIR/*.lsp; do
 
     echo "$test_name"
     expected_output=$(awk "/^$test_name$/{flag=1;next}/^[a-zA-Z0-9]+_[0-9]+\.lsp$/{flag=0}flag" "$ANS_FILE")
-    actual_output=$(python $PROGRAM_NAME < $test_file 2>&1)
+    
+    if [[ "$OSTYPE" == "linux-gnu"* ]] || [[ "$OSTYPE" == "darwin"* ]]; then
+        actual_output=$(python3 $PROGRAM_NAME < $test_file 2>&1)
+    elif [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]]; then
+        actual_output=$(python $PROGRAM_NAME < $test_file 2>&1)
+    fi
 
     expected_output=$(echo "$expected_output" | tr -d '\r')
     actual_output=$(echo "$actual_output" | tr -d '\r')
